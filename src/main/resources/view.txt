@@ -1,0 +1,63 @@
+latest
+
+function (doc, meta) {
+  if (doc.author && doc.date) {
+    	var d = doc;
+	emit(doc.author, d);
+  }
+}
+
+function(key, values, rereduce) {
+  var result;
+  for(i=0; i < values.length; i++) {
+      if (!result) {
+      	result = values[i];
+        continue;
+      }
+      if (result.date < values[i].date) {
+      	result = values[i];
+      }
+  }
+  return result;
+}
+
+
+threads
+function (doc, meta) {
+  if (doc.thread) {
+	  emit(doc.thread, null);
+  }
+}
+
+__
+
+search_direct
+function (doc, meta) {
+  var text = doc.text;
+  var fragments = text.toLowerCase().split(" ");
+  for (var i = 0; i < fragments.length; i++) {
+    var frg = fragments[i].trim();
+    if (frg.length > 0) {
+	  emit(frg, null);
+    }
+  }
+}
+__
+
+search_inverse
+function (doc, meta) {
+  var text = doc.text;
+  var tmp = "";
+  for (var i = text.length-1; i >=0; i--) {
+  	tmp += text.charAt(i);
+  }
+  var fragments = tmp.toLowerCase().split(" ");
+  for (var i = 0; i < fragments.length; i++) {
+    var frg = fragments[i].trim();
+    if (frg.length > 0) {
+	  emit(frg, null);
+    }
+  }
+}
+
+__
